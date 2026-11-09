@@ -1,0 +1,14 @@
+# local review drafts & caches (never commit)
+local/*
+!local/.gitkeep
+
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.DS_Store
+.env

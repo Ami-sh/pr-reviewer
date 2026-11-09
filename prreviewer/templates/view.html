@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PR review draft</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--border:#d0d7de;--card:#f6f8fa;--accent:#0969da;--add:#dafbe1;--del:#ffebe9;--addfg:#116329;--delfg:#82071e;--hl:#fff8c5;--cut:#eaeef2;
+ --critical:#a40e26;--high:#bc4c00;--medium:#9a6700;--low:#0969da;--nit:#6e7781;--praise:#1a7f37;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--border:#30363d;--card:#161b22;--accent:#58a6ff;--add:#12261e;--del:#2d1214;--addfg:#7ee787;--delfg:#ffa198;--hl:#3a2d00;--cut:#21262d;}}
+:root[data-theme="dark"]{--bg:#0d1117;--fg:#e6edf3;--muted:#8b949e;--border:#30363d;--card:#161b22;--accent:#58a6ff;--add:#12261e;--del:#2d1214;--addfg:#7ee787;--delfg:#ffa198;--hl:#3a2d00;--cut:#21262d;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;flex:1 1 300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .status{color:var(--muted);font-size:12px}
+button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.danger{color:var(--delfg)}
+button:disabled{opacity:.5;cursor:default}
+main{max-width:1200px;margin:0 auto;padding:16px}
+section{margin-bottom:24px}
+h2{font-size:15px;margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.meta{color:var(--muted);font-size:13px}
+.meta a{color:var(--accent)}
+textarea{width:100%;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg);min-height:80px;resize:vertical}
+select,input[type=text],input[type=number]{font:inherit;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg)}
+.card{border:1px solid var(--border);border-radius:8px;background:var(--card);padding:12px;margin-bottom:12px}
+.card.cut{background:var(--cut);opacity:.6}
+.card .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.card .title{flex:1 1 300px;font-weight:600}
+.card input.title{font-weight:600;flex:1 1 300px}
+.sev{display:inline-block;padding:1px 8px;border-radius:12px;color:#fff;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.sev.critical{background:var(--critical)}.sev.high{background:var(--high)}.sev.medium{background:var(--medium)}.sev.low{background:var(--low)}.sev.nit{background:var(--nit)}
+.chip{display:inline-block;padding:1px 8px;border-radius:12px;background:var(--bg);border:1px solid var(--border);font-size:11px;color:var(--muted)}
+.loc{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+pre.snippet{margin:8px 0;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:260px}
+pre.snippet .add{background:var(--add);color:var(--addfg);display:block}
+pre.snippet .del{background:var(--del);color:var(--delfg);display:block}
+pre.snippet .ctx{display:block}
+pre.snippet .hl{outline:2px solid var(--accent);outline-offset:-2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.row label{font-size:12px;color:var(--muted)}
+.small{font-size:12px;color:var(--muted)}
+details.verif{margin-top:6px;font-size:12px;color:var(--muted)}
+.diffwrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.diffwrap .fname{padding:6px 10px;background:var(--card);font-family:ui-monospace,Menlo,monospace;font-size:12px;border-bottom:1px solid var(--border);cursor:pointer}
+.diffwrap table{width:100%;border-collapse:collapse;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+.diffwrap td{padding:0 6px;vertical-align:top;white-space:pre-wrap;word-break:break-all}
+.diffwrap td.no{width:46px;text-align:right;color:var(--muted);user-select:none;cursor:pointer;border-right:1px solid var(--border)}
+.diffwrap td.no:hover{background:var(--hl);color:var(--fg)}
+.diffwrap tr.add{background:var(--add)}.diffwrap tr.del{background:var(--del)}.diffwrap tr.hunk td{background:var(--card);color:var(--muted);padding:2px 6px}
+.diffwrap tr.has td.no{font-weight:700;color:var(--accent)}
+.hidden{display:none}
+.toast{position:fixed;bottom:16px;right:16px;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:6px;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+.verdict label{margin-right:12px}
+.counts{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+.help{font-size:12px;color:var(--muted);margin-top:4px}
+kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--card)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h-title">PR review draft</h1>
+  <span class="status" id="status"></span>
+  <button id="btn-add">+ Add comment</button>
+  <button id="btn-download">Download JSON</button>
+  <button id="btn-save" class="primary">Save</button>
+</header>
+<main>
+  <section>
+    <div class="meta" id="meta"></div>
+    <div class="help">Edit anything, <b>Cut</b> a comment to drop it from the posted review, click a line number in the diff to add a comment there. Then <kbd>Save</kbd> (or <kbd>⌘/Ctrl+S</kbd>) and run <code>python review.py post --id &lt;id&gt;</code>.</div>
+  </section>
+
+  <section>
+    <h2>Verdict</h2>
+    <div class="verdict" id="verdict"></div>
+    <div class="counts" id="counts"></div>
+  </section>
+
+  <section>
+    <h2>Summary (review body, markdown)</h2>
+    <textarea id="summary" rows="10"></textarea>
+  </section>
+
+  <section>
+    <h2>Comments <span class="small" id="fcount"></span></h2>
+    <div id="findings"></div>
+  </section>
+
+  <section>
+    <h2>Diff <span class="small">(click a line number to add a comment)</span></h2>
+    <div id="diff"></div>
+  </section>
+
+  <section>
+    <details><summary>Repository understanding (stage 1 output)</summary><pre class="snippet" id="understanding"></pre></details>
+    <details><summary>Run stats</summary><pre class="snippet" id="stats"></pre></details>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script id="data" type="application/json">/*__DATA__*/null</script>
+<script>
+(function(){
+  const DATA = JSON.parse(document.getElementById('data').textContent);
+  const review = DATA.review; const diff = DATA.diff || {files:[]}; const served = !!DATA.served;
+  const SEVS = ['critical','high','medium','low','nit'];
+  const CATS = ['bug','reward_hacking','test_gap','security','design','performance','docs','style','question','praise'];
+  let dirty = false;
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+  function setDirty(v){dirty=v;$('status').textContent=v?'unsaved changes':(served?'saved':'static file (download JSON to keep edits)');}
+
+  // ---------- header / meta
+  const pr = review.pr||{};
+  document.title = 'Review '+review.id;
+  $('h-title').textContent = `#${pr.number||''} ${pr.title||''}`;
+  $('meta').innerHTML = `<b>id:</b> <code>${esc(review.id)}</code> · <a href="${esc(pr.url||'#')}" target="_blank">${esc(pr.owner||'')}/${esc(pr.repo||'')}#${esc(pr.number||'')}</a> · by ${esc(pr.author||'?')} · head <code>${esc((pr.head_sha||'').slice(0,10))}</code> · ${esc((review.settings||{}).method||'')}/${esc((review.settings||{}).model||'')} · critic=${esc((review.settings||{}).critic_level||'')}${review.posted?' · <b>POSTED</b>':''}`;
+  $('understanding').textContent = JSON.stringify(review.understanding||{},null,2);
+  $('stats').textContent = JSON.stringify(review.stats||{},null,2);
+
+  // ---------- verdict
+  function renderVerdict(){
+    $('verdict').innerHTML = ['APPROVE','COMMENT','REQUEST_CHANGES'].map(v=>`<label><input type="radio" name="verdict" value="${v}" ${review.verdict===v?'checked':''}> ${v.replace('_',' ')}</label>`).join('');
+    $('verdict').querySelectorAll('input').forEach(i=>i.addEventListener('change',e=>{review.verdict=e.target.value;setDirty(true);}));
+  }
+  function renderCounts(){
+    const act = review.findings.filter(f=>f.status!=='cut');
+    const c = {}; SEVS.forEach(s=>c[s]=0); act.forEach(f=>c[f.severity]=(c[f.severity]||0)+1);
+    $('counts').innerHTML = SEVS.map(s=>`<span class="sev ${s}">${s} ${c[s]}</span>`).join('') + ` <span class="chip">${act.length} active / ${review.findings.length-act.length} cut</span>`;
+    $('fcount').textContent = `(${act.length} active)`;
+  }
+  $('summary').value = review.summary||'';
+  $('summary').addEventListener('input',e=>{review.summary=e.target.value;setDirty(true);});
+
+  // ---------- diff index
+  const lineIndex = {}; // path -> side -> line -> {kind,text,hunk}
+  (diff.files||[]).forEach(f=>{ lineIndex[f.path]={LEFT:{},RIGHT:{}}; (f.hunks||[]).forEach((h,hi)=>{ (h.lines||[]).forEach(l=>{ if(l.kind==='add'||l.kind==='ctx') lineIndex[f.path].RIGHT[l.new_no]={kind:l.kind,text:l.text,hunk:hi}; if(l.kind==='del'||l.kind==='ctx') lineIndex[f.path].LEFT[l.old_no]={kind:l.kind,text:l.text,hunk:hi}; }); }); });
+  function snippet(f){
+    const file=(diff.files||[]).find(x=>x.path===f.path); if(!file||f.line==null) return '';
+    const side=f.side||'RIGHT';
+    for(const h of file.hunks||[]){
+      let idx=-1; (h.lines||[]).forEach((l,i)=>{ if(idx<0 && ((side==='RIGHT'&&l.kind!=='del'&&l.new_no===f.line)||(side==='LEFT'&&l.kind!=='add'&&l.old_no===f.line))) idx=i; });
+      if(idx<0) continue;
+      const lo=Math.max(0,idx-4), hi=Math.min(h.lines.length,idx+5);
+      return h.lines.slice(lo,hi).map((l,i)=>{ const n=l.kind==='del'?('L'+l.old_no):('R'+l.new_no); const m=l.kind==='add'?'+':(l.kind==='del'?'-':' '); return `<span class="${l.kind}${lo+i===idx?' hl':''}">${esc(n.padEnd(6))}${m} ${esc(l.text)}</span>`; }).join('');
+    }
+    return '<span class="ctx">(line not in diff — will be posted in the review body)</span>';
+  }
+
+  // ---------- findings
+  function renderFindings(){
+    const root=$('findings'); root.innerHTML='';
+    const order=[...review.findings.keys()].sort((a,b)=>{const fa=review.findings[a],fb=review.findings[b]; return (SEVS.indexOf(fa.severity)-SEVS.indexOf(fb.severity))||String(fa.path).localeCompare(fb.path)||((fa.line||0)-(fb.line||0));});
+    if(!review.findings.length){root.innerHTML='<div class="small">No findings. Add one with “+ Add comment” or by clicking a diff line.</div>';}
+    order.forEach(i=>{
+      const f=review.findings[i]; const cut=f.status==='cut';
+      const card=document.createElement('div'); card.className='card'+(cut?' cut':''); card.id='f-'+f.id;
+      const ver=f.verification||{}; const vtxt = ver.verdict? `verification: ${ver.verdict} (${ver.votes||'?'} votes, confidence ${ver.confidence!=null?Number(ver.confidence).toFixed(2):'?'})` : 'not verified';
+      card.innerHTML=`
+        <div class="top">
+          <span class="sev ${esc(f.severity)}">${esc(f.severity)}</span>
+          <input class="title" type="text" value="${esc(f.title)}" ${cut?'disabled':''}>
+          <span class="chip">${esc(f.category)}</span><span class="chip">${esc(f.lens||'manual')}</span><span class="chip">conf ${Number(f.confidence||0).toFixed(2)}</span>
+        </div>
+        <div class="loc">${esc(f.path)}${f.line!=null?':'+esc(f.line):''} ${f.start_line?('(from '+esc(f.start_line)+')'):''} [${esc(f.side||'RIGHT')}]</div>
+        <pre class="snippet">${snippet(f)}</pre>
+        <label class="small">Comment body (markdown, posted inline)</label>
+        <textarea class="body" ${cut?'disabled':''}>${esc(f.body||f.explanation||'')}</textarea>
+        <label class="small">Suggestion (prose; appended as “Suggestion:”)</label>
+        <textarea class="sugg" rows="2" ${cut?'disabled':''}>${esc(f.suggestion||'')}</textarea>
+        <label class="small">Suggested code (optional; becomes a GitHub suggestion block replacing lines start..line)</label>
+        <textarea class="code" rows="2" ${cut?'disabled':''}>${esc(f.suggested_code||'')}</textarea>
+        <div class="row">
+          <label>severity <select class="sev-sel" ${cut?'disabled':''}>${SEVS.map(s=>`<option ${f.severity===s?'selected':''}>${s}</option>`).join('')}</select></label>
+          <label>category <select class="cat-sel" ${cut?'disabled':''}>${CATS.map(s=>`<option ${f.category===s?'selected':''}>${s}</option>`).join('')}</select></label>
+          <label>path <input class="path" type="text" value="${esc(f.path)}" size="28" ${cut?'disabled':''}></label>
+          <label>side <select class="side-sel" ${cut?'disabled':''}><option ${f.side==='RIGHT'?'selected':''}>RIGHT</option><option ${f.side==='LEFT'?'selected':''}>LEFT</option></select></label>
+          <label>start <input class="start" type="number" value="${f.start_line==null?'':esc(f.start_line)}" style="width:80px" ${cut?'disabled':''}></label>
+          <label>line <input class="line" type="number" value="${f.line==null?'':esc(f.line)}" style="width:80px" ${cut?'disabled':''}></label>
+          <span style="flex:1"></span>
+          ${cut?'<button class="restore">Restore</button>':'<button class="cut danger">Cut</button>'}
+        </div>
+        <details class="verif"><summary>${esc(vtxt)} · evidence & reasoning</summary><div><b>Evidence:</b> ${esc(f.evidence||'')}</div><div><b>Explanation:</b> ${esc(f.explanation||'')}</div>${ver.reasoning?`<div><b>Verifier:</b> ${esc(ver.reasoning)}</div>`:''}</details>`;
+      const bind=(sel,fn)=>{const el=card.querySelector(sel); if(el) el.addEventListener('input',e=>{fn(e.target.value);setDirty(true);});};
+      bind('input.title',v=>f.title=v); bind('textarea.body',v=>f.body=v); bind('textarea.sugg',v=>f.suggestion=v); bind('textarea.code',v=>f.suggested_code=v.trim()?v:null);
+      bind('select.sev-sel',v=>{f.severity=v;card.querySelector('.sev').className='sev '+v;card.querySelector('.sev').textContent=v;renderCounts();});
+      bind('select.cat-sel',v=>f.category=v); bind('input.path',v=>f.path=v); bind('select.side-sel',v=>{f.side=v;card.querySelector('pre.snippet').innerHTML=snippet(f);});
+      bind('input.start',v=>f.start_line=v===''?null:parseInt(v,10)); bind('input.line',v=>{f.line=v===''?null:parseInt(v,10);card.querySelector('pre.snippet').innerHTML=snippet(f);});
+      const cutBtn=card.querySelector('button.cut'); if(cutBtn) cutBtn.onclick=()=>{f.status='cut';setDirty(true);renderFindings();renderCounts();renderDiff();};
+      const resBtn=card.querySelector('button.restore'); if(resBtn) resBtn.onclick=()=>{f.status='active';setDirty(true);renderFindings();renderCounts();renderDiff();};
+      root.appendChild(card);
+    });
+  }
+
+  // ---------- diff view
+  function renderDiff(){
+    const root=$('diff'); root.innerHTML='';
+    const anchors={}; review.findings.filter(f=>f.status!=='cut'&&f.line!=null).forEach(f=>{anchors[`${f.path}|${f.side||'RIGHT'}|${f.line}`]=f.id;});
+    (diff.files||[]).forEach(file=>{
+      const wrap=document.createElement('div'); wrap.className='diffwrap';
+      const name=document.createElement('div'); name.className='fname'; name.textContent=`${file.path}  (${file.status})`; wrap.appendChild(name);
+      const tbl=document.createElement('table'); const big=(file.hunks||[]).reduce((n,h)=>n+(h.lines||[]).length,0)>600; if(big) tbl.classList.add('hidden');
+      name.onclick=()=>tbl.classList.toggle('hidden');
+      (file.hunks||[]).forEach(h=>{
+        const tr=document.createElement('tr'); tr.className='hunk'; tr.innerHTML=`<td colspan="3">@@ -${h.old_start},${h.old_len} +${h.new_start},${h.new_len} @@ ${esc(h.header)}</td>`; tbl.appendChild(tr);
+        (h.lines||[]).forEach(l=>{
+          if(l.kind==='meta') return;
+          const side=l.kind==='del'?'LEFT':'RIGHT'; const no=l.kind==='del'?l.old_no:l.new_no; const key=`${file.path}|${side}|${no}`;
+          const r=document.createElement('tr'); r.className=l.kind+(anchors[key]?' has':'');
+          r.innerHTML=`<td class="no" title="add comment at ${side} ${no}">${l.kind==='add'?'':esc(l.old_no||'')}</td><td class="no" title="add comment at ${side} ${no}">${l.kind==='del'?'':esc(l.new_no||'')}</td><td>${l.kind==='add'?'+':(l.kind==='del'?'-':' ')} ${esc(l.text)}</td>`;
+          r.querySelectorAll('td.no').forEach(td=>td.onclick=()=>{ if(anchors[key]){ location.hash='f-'+anchors[key]; } else addFinding(file.path,side,no); });
+          tbl.appendChild(r);
+        });
+      });
+      wrap.appendChild(tbl); root.appendChild(wrap);
+    });
+  }
+
+  // ---------- add / save
+  function addFinding(path,side,line){
+    const id='manual-'+Math.random().toString(16).slice(2,8);
+    review.findings.push({id,lens:'manual',title:'New comment',severity:'medium',category:'question',confidence:1,path:path||'',line:line==null?null:line,start_line:null,side:side||'RIGHT',evidence:'',explanation:'',suggestion:'',suggested_code:null,blocking:false,verification:{},status:'active',body:''});
+    setDirty(true); renderFindings(); renderCounts(); renderDiff();
+    setTimeout(()=>{const el=$('f-'+id); if(el){el.scrollIntoView({behavior:'smooth',block:'center'}); const t=el.querySelector('textarea.body'); if(t) t.focus();}},50);
+  }
+  $('btn-add').onclick=()=>addFinding('',null,null);
+  async function save(){
+    if(!served){ download(); return; }
+    try{
+      const r=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(review)});
+      if(!r.ok) throw new Error(await r.text());
+      setDirty(false); toast('Saved to local/'+review.id+'/data/review.json');
+    }catch(e){ toast('Save failed: '+e.message); }
+  }
+  function download(){
+    const blob=new Blob([JSON.stringify(review,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review.json'; a.click(); toast('Downloaded review.json — copy it over local/'+review.id+'/data/review.json');
+  }
+  $('btn-save').onclick=save; $('btn-download').onclick=download;
+  document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();save();} });
+  window.addEventListener('beforeunload',e=>{ if(dirty){e.preventDefault();e.returnValue='';} });
+
+  renderVerdict(); renderCounts(); renderFindings(); renderDiff(); setDirty(false);
+})();
+</script>
+</body>
+</html>

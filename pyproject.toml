@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pr-reviewer"
+version = "0.1.0"
+description = "Independent, one-shot LLM pull-request reviewer (Claude Code or API backends)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = ["requests>=2.28"]
+
+[project.optional-dependencies]
+api = ["anthropic>=0.40", "openai>=1.40"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+pr-review = "prreviewer.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["prreviewer*"]
+
+[tool.setuptools.package-data]
+prreviewer = ["prompts/*.md", "prompts/lenses/*.md", "templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
